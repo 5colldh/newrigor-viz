@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="https://raw.github.com/jasondavies/d3-cloud/master/d3.layout.cloud.js"></script>
+</head>
+<body>
+<script>
+
+  // embed Jason Davies' d3-cloud since it's not available in a CDN
+  // Word cloud layout by Jason Davies, http://www.jasondavies.com/word-cloud/
+// Algorithm due to Jonathan Feinberg, http://static.mrfeinberg.com/bv_ch03.pdf
+(function() {
+
+if (typeof define === "function" && define.amd) define(["d3"], cloud);
+else cloud(this.d3);
+
+function cloud(d3) {
+  d3.layout.cloud = function cloud() {
+    var size = [256, 256],
+        text = cloudText,
+        font = cloudFont,
+        fontSize = cloudFontSize,
+        fontStyle = cloudFontNormal,
+        fontWeight = cloudFontNormal,
+        rotate = cloudRotate,
+        padding = cloudPadding,
+        spiral = archimedeanSpiral,
+        words = [],
+        timeInterval = Infinity,
+        event = d3.dispatch("word", "end"),
+        timer = null,
+        random = Math.random,
+        cloud = {};
+
+    cloud.start = function() {
+      var board = zeroArray((size[0] >> 5) * size[1]),
+          bounds = null,
+          n = words.length,
+          i = -1,
+          tags = [],
+          data = words.map(function(d, i) {
+            d.text = text.call(this, d, i);
+            d.font = font.call(this, d, i);
+            d.style = fontStyle.call(this, d, i);
+            d.weight = fontWeight.call(this, d, i);
+            d.rotate = rotate.call(this, d, i);
+            d.size = ~~fontSize.call(this, d, i);
+            d.padding = padding.call(this, d, i);
+            return d;
+          }).sort(function(a, b) { return b.size - a.size; });
+
+      if (timer) clearInterval(timer);
+      timer = setInterval(step, 0);
+      step();
+
+      return cloud;
+
+      function step() {
+        var start = Date.now();
+        while (Date.now() - start < timeInterval && ++i < n && timer) {
+          var d = data[i];
+          d.x = (size[0] * (random() + .5)) >> 1;
+          d.y = (size[1] * (random() + .5)) >> 1;
+          cloudSprite(d, data, i);
+          if (d.hasText && place(board, d, bounds)) {
+            tags.push(d);
+            event.word(d);
+            if (bounds) cloudBounds(bounds, d);
+            else bounds = [{x: d.x + d.x0, y: d.y + d.y0}, {x: d.x + d.x1, y: d.y + d.y1}];
+            // Temporary hack
+            d.x -= size[0] >> 1;
+            d.y -= size[1] >> 1;
+          }
+        }
+        if (i >= n) {
+          cloud.stop();
+          event.end(tags, bounds);
+        }
+      }
+    }
+
+    cloud.stop = function() {
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+      }
+      return cloud;
+    };
+
+    function place(board, tag, bounds) {
+      var perimeter = [{x: 0, y: 0}, {x: size[0], y: size[1]}],
+          startX = tag.x,
+          startY = tag.y,
+          maxDelta = Math.sqrt(size[0] * size[0] + size[1] * size[1]),
+          s = spiral(size),
+          dt = random() < .5 ? 1 : -1,
+          t = -dt,
+          dxdy,
+          dx,
+          dy;
+
+      while (dxdy = s(t += dt)) {
+        dx = ~~dxdy[0];
+        dy = ~~dxdy[1];
+
+        if (Math.min(Math.abs(dx), Math.abs(dy)) >= maxDelta) break;
+
+        tag.x = startX + dx;
+        tag.y = startY + dy;
+
+        if (tag.x + tag.x0 < 0 || tag.y + tag.y0 < 0 ||
+            tag.x + tag.x1 > size[0] || tag.y + tag.y1 > size[1]) continue;
+        // TODO only check for collisions within current bounds.
+        if (!bounds || !cloudCollide(tag, board, size[0])) {
+          if (!bounds || collideRects(tag, bounds)) {
+            var sprite = tag.sprite,
+                w = tag.width >> 5,
+                sw = size[0] >> 5,
+                lx = tag.x - (w << 4),
+                sx = lx & 0x7f,
+                msx = 32 - sx,
+                h = tag.y1 - tag.y0,
+                x = (tag.y + tag.y0) * sw + (lx >> 5),
+                last;
+            for (var j = 0; j < h; j++) {
+              last = 0;
+              for (var i = 0; i <= w; i++) {
+                board[x + i] |= (last << msx) | (i < w ? (last = sprite[j * w + i]) >>> sx : 0);
+              }
+              x += sw;
+            }
+            delete tag.sprite;
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    cloud.timeInterval = function(_) {
+      return arguments.length ? (timeInterval = _ == null ? Infinity : _, cloud) : timeInterval;
+    };
+
+    cloud.words = function(_) {
+      return arguments.length ? (words = _, cloud) : words;
+    };
+
+    cloud.size = function(_) {
+      return arguments.length ? (size = [+_[0], +_[1]], cloud) : size;
+    };
+
+    cloud.font = function(_) {
+      return arguments.length ? (font = d3.functor(_), cloud) : font;
+    };
+
+    cloud.fontStyle = function(_) {
+      return arguments.length ? (fontStyle = d3.functor(_), cloud) : fontStyle;
+    };
+
+    cloud.fontWeight = function(_) {
+      return arguments.length ? (fontWeight = d3.functor(_), cloud) : fontWeight;
+    };
+
+    cloud.rotate = function(_) {
+      return arguments.length ? (rotate = d3.functor(_), cloud) : rotate;
+    };
+
+    cloud.text = function(_) {
+      return arguments.length ? (text = d3.functor(_), cloud) : text;
+    };
+
+    cloud.spiral = function(_) {
+      return arguments.length ? (spiral = spirals[_] || _, cloud) : spiral;
+    };
+
+    cloud.fontSize = function(_) {
+      return arguments.length ? (fontSize = d3.functor(_), cloud) : fontSize;
+    };
+
+    cloud.padding = function(_) {
+      return arguments.length ? (padding = d3.functor(_), cloud) : padding;
+    };
+
+    cloud.random = function(_) {
+      return arguments.length ? (random = _, cloud) : random;
+    };
+
+    return d3.rebind(cloud, event, "on");
+  };
+
+  function cloudText(d) {
+    return d.text;
+  }
+
+  function cloudFont() {
+    return "serif";
+  }
+
+  function cloudFontNormal() {
+    return "normal";
+  }
+
+  function cloudFontSize(d) {
+    return Math.sqrt(d.value);
+  }
+
+  function cloudRotate() {
+    return (~~(Math.random() * 6) - 3) * 30;
+  }
+
+  function cloudPadding() {
+    return 1;
+  }
+
+  // Fetches a monochrome sprite bitmap for the specified text.
+  // Load in batches for speed.
+  function cloudSprite(d, data, di) {
+    if (d.sprite) return;
+    c.clearRect(0, 0, (cw << 5) / ratio, ch / ratio);
+    var x = 0,
+        y = 0,
+        maxh = 0,
+        n = data.length;
+    --di;
+    while (++di < n) {
+      d = data[di];
+      c.save();
+      c.font = d.style + " " + d.weight + " " + ~~((d.size + 1) / ratio) + "px " + d.font;
+      var w = c.measureText(d.text + "m").width * ratio,
+          h = d.size << 1;
+      if (d.rotate) {
+        var sr = Math.sin(d.rotate * cloudRadians),
+            cr = Math.cos(d.rotate * cloudRadians),
+            wcr = w * cr,
+            wsr = w * sr,
+            hcr = h * cr,
+            hsr = h * sr;
+        w = (Math.max(Math.abs(wcr + hsr), Math.abs(wcr - hsr)) + 0x1f) >> 5 << 5;
+        h = ~~Math.max(Math.abs(wsr + hcr), Math.abs(wsr - hcr));
+      } else {
+        w = (w + 0x1f) >> 5 << 5;
+      }
+      if (h > maxh) maxh = h;
+      if (x + w >= (cw << 5)) {
+        x = 0;
+        y += maxh;
+        maxh = 0;
+      }
+      if (y + h >= ch) break;
+      c.translate((x + (w >> 1)) / ratio, (y + (h >> 1)) / ratio);
+      if (d.rotate) c.rotate(d.rotate * cloudRadians);
+      c.fillText(d.text, 0, 0);
+      if (d.padding) c.lineWidth = 2 * d.padding, c.strokeText(d.text, 0, 0);
+      c.restore();
+      d.width = w;
+      d.height = h;
+      d.xoff = x;
+      d.yoff = y;
+      d.x1 = w >> 1;
+      d.y1 = h >> 1;
+      d.x0 = -d.x1;
+      d.y0 = -d.y1;
+      d.hasText = true;
+      x += w;
+    }
+    var pixels = c.getImageData(0, 0, (cw << 5) / ratio, ch / ratio).data,
+        sprite = [];
+    while (--di >= 0) {
+      d = data[di];
+      if (!d.hasText) continue;
+      var w = d.width,
+          w32 = w >> 5,
+          h = d.y1 - d.y0;
+      // Zero the buffer
+      for (var i = 0; i < h * w32; i++) sprite[i] = 0;
+      x = d.xoff;
+      if (x == null) return;
+      y = d.yoff;
+      var seen = 0,
+          seenRow = -1;
+      for (var j = 0; j < h; j++) {
+        for (var i = 0; i < w; i++) {
+          var k = w32 * j + (i >> 5),
+              m = pixels[((y + j) * (cw << 5) + (x + i)) << 2] ? 1 << (31 - (i % 32)) : 0;
+          sprite[k] |= m;
+          seen |= m;
+        }
+        if (seen) seenRow = j;
+        else {
+          d.y0++;
+          h--;
+          j--;
+          y++;
+        }
+      }
+      d.y1 = d.y0 + seenRow;
+      d.sprite = sprite.slice(0, (d.y1 - d.y0) * w32);
+    }
+  }
+
+  // Use mask-based collision detection.
+  function cloudCollide(tag, board, sw) {
+    sw >>= 5;
+    var sprite = tag.sprite,
+        w = tag.width >> 5,
+        lx = tag.x - (w << 4),
+        sx = lx & 0x7f,
+        msx = 32 - sx,
+        h = tag.y1 - tag.y0,
+        x = (tag.y + tag.y0) * sw + (lx >> 5),
+        last;
+    for (var j = 0; j < h; j++) {
+      last = 0;
+      for (var i = 0; i <= w; i++) {
+        if (((last << msx) | (i < w ? (last = sprite[j * w + i]) >>> sx : 0))
+            & board[x + i]) return true;
+      }
+      x += sw;
+    }
+    return false;
+  }
+
+  function cloudBounds(bounds, d) {
+    var b0 = bounds[0],
+        b1 = bounds[1];
+    if (d.x + d.x0 < b0.x) b0.x = d.x + d.x0;
+    if (d.y + d.y0 < b0.y) b0.y = d.y + d.y0;
+    if (d.x + d.x1 > b1.x) b1.x = d.x + d.x1;
+    if (d.y + d.y1 > b1.y) b1.y = d.y + d.y1;
+  }
+
+  function collideRects(a, b) {
+    return a.x + a.x1 > b[0].x && a.x + a.x0 < b[1].x && a.y + a.y1 > b[0].y && a.y + a.y0 < b[1].y;
+  }
+
+  function archimedeanSpiral(size) {
+    var e = size[0] / size[1];
+    return function(t) {
+      return [e * (t *= .1) * Math.cos(t), t * Math.sin(t)];
+    };
+  }
+
+  function rectangularSpiral(size) {
+    var dy = 4,
+        dx = dy * size[0] / size[1],
+        x = 0,
+        y = 0;
+    return function(t) {
+      var sign = t < 0 ? -1 : 1;
+      // See triangular numbers: T_n = n * (n + 1) / 2.
+      switch ((Math.sqrt(1 + 4 * sign * t) - sign) & 3) {
+        case 0:  x += dx; break;
+        case 1:  y += dy; break;
+        case 2:  x -= dx; break;
+        default: y -= dy; break;
+      }
+      return [x, y];
+    };
+  }
+
+  // TODO reuse arrays?
+  function zeroArray(n) {
+    var a = [],
+        i = -1;
+    while (++i < n) a[i] = 0;
+    return a;
+  }
+
+  var cloudRadians = Math.PI / 180,
+      cw = 1 << 11 >> 5,
+      ch = 1 << 11,
+      canvas,
+      ratio = 1;
+
+  if (typeof document !== "undefined") {
+    canvas = document.createElement("canvas");
+    canvas.width = 1;
+    canvas.height = 1;
+    ratio = Math.sqrt(canvas.getContext("2d").getImageData(0, 0, 1, 1).data.length >> 2);
+    canvas.width = (cw << 5) / ratio;
+    canvas.height = ch / ratio;
+  } else {
+    // Attempt to use node-canvas.
+    canvas = new Canvas(cw << 5, ch);
+  }
+
+  var c = canvas.getContext("2d"),
+      spirals = {
+        archimedean: archimedeanSpiral,
+        rectangular: rectangularSpiral
+      };
+  c.fillStyle = c.strokeStyle = "red";
+  c.textAlign = "center";
+}
+
+})();
+
+
+  var fill = d3.scale.category20();
+  var words = [
+  {
+    "text": "project", 
+    "size": 122
+  }, 
+  {
+    "text": "van", 
+    "size": 84
+  }, 
+  {
+    "text": "new", 
+    "size": 68
+  }, 
+  {
+    "text": "digital", 
+    "size": 68
+  }, 
+  {
+    "text": "assessment", 
+    "size": 61
+  }, 
+  {
+    "text": "technology", 
+    "size": 61
+  }, 
+  {
+    "text": "campbell", 
+    "size": 61
+  }, 
+  {
+    "text": "wang", 
+    "size": 53
+  }, 
+  {
+    "text": "group", 
+    "size": 53
+  }, 
+  {
+    "text": "internet", 
+    "size": 53
+  }, 
+  {
+    "text": "evaluation", 
+    "size": 53
+  }, 
+  {
+    "text": "talking", 
+    "size": 53
+  }, 
+  {
+    "text": "different", 
+    "size": 53
+  }, 
+  {
+    "text": "humanities", 
+    "size": 53
+  }, 
+  {
+    "text": "johnson:", 
+    "size": 53
+  }, 
+  {
+    "text": "research", 
+    "size": 45
+  }, 
+  {
+    "text": "johnson's", 
+    "size": 45
+  }, 
+  {
+    "text": "force", 
+    "size": 45
+  }, 
+  {
+    "text": "streets", 
+    "size": 45
+  }, 
+  {
+    "text": "principal", 
+    "size": 45
+  }, 
+  {
+    "text": "great", 
+    "size": 45
+  }, 
+  {
+    "text": "i'm", 
+    "size": 45
+  }, 
+  {
+    "text": "conference!", 
+    "size": 45
+  }, 
+  {
+    "text": "join", 
+    "size": 45
+  }, 
+  {
+    "text": "work", 
+    "size": 45
+  }, 
+  {
+    "text": "through", 
+    "size": 45
+  }, 
+  {
+    "text": "uses", 
+    "size": 45
+  }, 
+  {
+    "text": "iron", 
+    "size": 45
+  }, 
+  {
+    "text": "craig", 
+    "size": 45
+  }, 
+  {
+    "text": "juliana", 
+    "size": 45
+  }, 
+  {
+    "text": "undergrad", 
+    "size": 45
+  }, 
+  {
+    "text": "between", 
+    "size": 45
+  }, 
+  {
+    "text": "fellow", 
+    "size": 45
+  }, 
+  {
+    "text": "convo", 
+    "size": 45
+  }, 
+  {
+    "text": "pardo's", 
+    "size": 45
+  }, 
+  {
+    "text": "roggen", 
+    "size": 45
+  }, 
+  {
+    "text": "student", 
+    "size": 45
+  }, 
+  {
+    "text": "game", 
+    "size": 45
+  }, 
+  {
+    "text": "registered", 
+    "size": 45
+  }, 
+  {
+    "text": "scholarly", 
+    "size": 45
+  }, 
+  {
+    "text": "register:", 
+    "size": 45
+  }, 
+  {
+    "text": "up,", 
+    "size": 38
+  }, 
+  {
+    "text": "use", 
+    "size": 38
+  }, 
+  {
+    "text": "next", 
+    "size": 38
+  }, 
+  {
+    "text": "more", 
+    "size": 38
+  }, 
+  {
+    "text": "discussion", 
+    "size": 38
+  }, 
+  {
+    "text": "maps", 
+    "size": 38
+  }, 
+  {
+    "text": "symposium", 
+    "size": 38
+  }, 
+  {
+    "text": "window", 
+    "size": 38
+  }, 
+  {
+    "text": "now", 
+    "size": 38
+  }, 
+  {
+    "text": "first", 
+    "size": 38
+  }, 
+  {
+    "text": "sounds", 
+    "size": 38
+  }, 
+  {
+    "text": "collaboration", 
+    "size": 38
+  }, 
+  {
+    "text": "queer", 
+    "size": 38
+  }, 
+  {
+    "text": "staff", 
+    "size": 38
+  }, 
+  {
+    "text": "means", 
+    "size": 38
+  }, 
+  {
+    "text": "made", 
+    "size": 38
+  }, 
+  {
+    "text": "cade", 
+    "size": 38
+  }, 
+  {
+    "text": "w/o", 
+    "size": 38
+  }, 
+  {
+    "text": "see", 
+    "size": 38
+  }, 
+  {
+    "text": "taking", 
+    "size": 38
+  }, 
+  {
+    "text": "conference", 
+    "size": 38
+  }, 
+  {
+    "text": "questions", 
+    "size": 38
+  }, 
+  {
+    "text": "thinking", 
+    "size": 38
+  }, 
+  {
+    "text": "pompeii", 
+    "size": 38
+  }, 
+  {
+    "text": "evaluate", 
+    "size": 38
+  }, 
+  {
+    "text": "google", 
+    "size": 38
+  }, 
+  {
+    "text": "participation", 
+    "size": 38
+  }, 
+  {
+    "text": "campbell\u2019s", 
+    "size": 38
+  }, 
+  {
+    "text": "support", 
+    "size": 38
+  }, 
+  {
+    "text": "question", 
+    "size": 38
+  }, 
+  {
+    "text": "difference", 
+    "size": 30
+  }, 
+  {
+    "text": "allow\u201d", 
+    "size": 30
+  }, 
+  {
+    "text": "cues", 
+    "size": 30
+  }, 
+  {
+    "text": "here", 
+    "size": 30
+  }, 
+  {
+    "text": "address", 
+    "size": 30
+  }, 
+  {
+    "text": "makes", 
+    "size": 30
+  }, 
+  {
+    "text": "takes", 
+    "size": 30
+  }, 
+  {
+    "text": "working", 
+    "size": 30
+  }, 
+  {
+    "text": "becomes", 
+    "size": 30
+  }, 
+  {
+    "text": "making", 
+    "size": 30
+  }, 
+  {
+    "text": "we\u2019re", 
+    "size": 30
+  }, 
+  {
+    "text": "write", 
+    "size": 30
+  }, 
+  {
+    "text": "answer", 
+    "size": 30
+  }, 
+  {
+    "text": "attend", 
+    "size": 30
+  }, 
+  {
+    "text": "hope\"", 
+    "size": 30
+  }, 
+  {
+    "text": "tied", 
+    "size": 30
+  }, 
+  {
+    "text": "data", 
+    "size": 30
+  }, 
+  {
+    "text": "help", 
+    "size": 30
+  }, 
+  {
+    "text": "tweets", 
+    "size": 30
+  }, 
+  {
+    "text": "practice", 
+    "size": 30
+  }, 
+  {
+    "text": "break", 
+    "size": 30
+  }, 
+  {
+    "text": "roggen:", 
+    "size": 30
+  }, 
+  {
+    "text": "loops", 
+    "size": 30
+  }, 
+  {
+    "text": "space", 
+    "size": 30
+  }, 
+  {
+    "text": "viable", 
+    "size": 30
+  }, 
+  {
+    "text": "beginning", 
+    "size": 30
+  }, 
+  {
+    "text": "basement\"", 
+    "size": 30
+  }, 
+  {
+    "text": "need", 
+    "size": 30
+  }, 
+  {
+    "text": "build", 
+    "size": 30
+  }, 
+  {
+    "text": "proj\n\ntoday!", 
+    "size": 30
+  }, 
+  {
+    "text": "assessed", 
+    "size": 30
+  }, 
+  {
+    "text": "dream", 
+    "size": 30
+  }, 
+  {
+    "text": "tech", 
+    "size": 30
+  }, 
+  {
+    "text": "scholarship", 
+    "size": 30
+  }, 
+  {
+    "text": "session", 
+    "size": 30
+  }, 
+  {
+    "text": "tape", 
+    "size": 30
+  }, 
+  {
+    "text": "member\u2019s", 
+    "size": 30
+  }, 
+  {
+    "text": "screen", 
+    "size": 30
+  }, 
+  {
+    "text": "life", 
+    "size": 30
+  }, 
+  {
+    "text": "cyborg", 
+    "size": 30
+  }, 
+  {
+    "text": "those", 
+    "size": 30
+  }, 
+  {
+    "text": "virtual", 
+    "size": 30
+  }, 
+  {
+    "text": "ready", 
+    "size": 30
+  }, 
+  {
+    "text": "development", 
+    "size": 30
+  }, 
+  {
+    "text": "model", 
+    "size": 30
+  }, 
+  {
+    "text": "thanks", 
+    "size": 30
+  }, 
+  {
+    "text": "deposits", 
+    "size": 30
+  }, 
+  {
+    "text": "roggen's", 
+    "size": 30
+  }, 
+  {
+    "text": "excited", 
+    "size": 30
+  }, 
+  {
+    "text": "possible", 
+    "size": 30
+  }, 
+  {
+    "text": "using", 
+    "size": 30
+  }, 
+  {
+    "text": "poses", 
+    "size": 30
+  }, 
+  {
+    "text": "projects", 
+    "size": 30
+  }, 
+  {
+    "text": "twitter", 
+    "size": 30
+  }, 
+  {
+    "text": "tumblr", 
+    "size": 30
+  }, 
+  {
+    "text": "wang:", 
+    "size": 30
+  }, 
+  {
+    "text": "panel", 
+    "size": 30
+  }, 
+  {
+    "text": "getting", 
+    "size": 30
+  }, 
+  {
+    "text": "despair", 
+    "size": 30
+  }, 
+  {
+    "text": "scholarship,", 
+    "size": 30
+  }, 
+  {
+    "text": "intellectual", 
+    "size": 30
+  }, 
+  {
+    "text": "start", 
+    "size": 30
+  }, 
+  {
+    "text": "so,", 
+    "size": 30
+  }, 
+  {
+    "text": "hand", 
+    "size": 30
+  }, 
+  {
+    "text": "articulating", 
+    "size": 30
+  }, 
+  {
+    "text": "models", 
+    "size": 30
+  }, 
+  {
+    "text": "narrative", 
+    "size": 30
+  }, 
+  {
+    "text": "push", 
+    "size": 30
+  }, 
+  {
+    "text": "focus", 
+    "size": 22
+  }, 
+  {
+    "text": "professionally?", 
+    "size": 22
+  }, 
+  {
+    "text": "talks", 
+    "size": 22
+  }, 
+  {
+    "text": "follow", 
+    "size": 22
+  }, 
+  {
+    "text": "disgusting\"", 
+    "size": 22
+  }, 
+  {
+    "text": "friedberg", 
+    "size": 22
+  }, 
+  {
+    "text": "tweet", 
+    "size": 22
+  }, 
+  {
+    "text": "young", 
+    "size": 22
+  }, 
+  {
+    "text": "program", 
+    "size": 22
+  }, 
+  {
+    "text": "danielle", 
+    "size": 22
+  }, 
+  {
+    "text": "include", 
+    "size": 22
+  }, 
+  {
+    "text": "sound", 
+    "size": 22
+  }, 
+  {
+    "text": "very", 
+    "size": 22
+  }, 
+  {
+    "text": "horror", 
+    "size": 22
+  }, 
+  {
+    "text": "funding\n#orange", 
+    "size": 22
+  }, 
+  {
+    "text": "pardo:", 
+    "size": 22
+  }, 
+  {
+    "text": "today!", 
+    "size": 22
+  }, 
+  {
+    "text": "tomorrow,", 
+    "size": 22
+  }, 
+  {
+    "text": "steve", 
+    "size": 22
+  }, 
+  {
+    "text": "scholar", 
+    "size": 22
+  }, 
+  {
+    "text": "immediately", 
+    "size": 22
+  }, 
+  {
+    "text": "pre-tenure", 
+    "size": 22
+  }, 
+  {
+    "text": "make", 
+    "size": 22
+  }, 
+  {
+    "text": "time!", 
+    "size": 22
+  }, 
+  {
+    "text": "large", 
+    "size": 22
+  }, 
+  {
+    "text": "small", 
+    "size": 22
+  }, 
+  {
+    "text": "present?", 
+    "size": 22
+  }, 
+  {
+    "text": "round", 
+    "size": 22
+  }, 
+  {
+    "text": "smaller", 
+    "size": 22
+  }, 
+  {
+    "text": "scholars?", 
+    "size": 22
+  }, 
+  {
+    "text": "loops:using", 
+    "size": 22
+  }, 
+  {
+    "text": "second", 
+    "size": 22
+  }, 
+  {
+    "text": "levels,", 
+    "size": 22
+  }, 
+  {
+    "text": "others!", 
+    "size": 22
+  }, 
+  {
+    "text": "link", 
+    "size": 22
+  }, 
+  {
+    "text": "appreciating", 
+    "size": 22
+  }, 
+  {
+    "text": "group:", 
+    "size": 22
+  }, 
+  {
+    "text": "even", 
+    "size": 22
+  }, 
+  {
+    "text": "necessary,", 
+    "size": 22
+  }, 
+  {
+    "text": "giving", 
+    "size": 22
+  }, 
+  {
+    "text": "nec", 
+    "size": 22
+  }, 
+  {
+    "text": "collaborators,", 
+    "size": 22
+  }, 
+  {
+    "text": "goes", 
+    "size": 22
+  }, 
+  {
+    "text": "shared", 
+    "size": 22
+  }, 
+  {
+    "text": "public", 
+    "size": 22
+  }, 
+  {
+    "text": "movement", 
+    "size": 22
+  }, 
+  {
+    "text": "revealing", 
+    "size": 22
+  }, 
+  {
+    "text": "supporting", 
+    "size": 22
+  }, 
+  {
+    "text": "pats", 
+    "size": 22
+  }, 
+  {
+    "text": "display\"", 
+    "size": 22
+  }, 
+  {
+    "text": "never", 
+    "size": 22
+  }, 
+  {
+    "text": "understanding", 
+    "size": 22
+  }, 
+  {
+    "text": "explore", 
+    "size": 22
+  }, 
+  {
+    "text": "separation", 
+    "size": 22
+  }, 
+  {
+    "text": "pm,", 
+    "size": 22
+  }, 
+  {
+    "text": "consideration", 
+    "size": 22
+  }, 
+  {
+    "text": "along", 
+    "size": 22
+  }, 
+  {
+    "text": "pedals", 
+    "size": 22
+  }, 
+  {
+    "text": "experience", 
+    "size": 22
+  }, 
+  {
+    "text": "art,", 
+    "size": 22
+  }, 
+  {
+    "text": "breakdown", 
+    "size": 22
+  }
+]
+
+  d3.layout.cloud().size([800, 800])
+      .words(words)
+      .rotate(function() { return ~~(Math.random() * 2) * 90; })
+      .font("Impact")
+      .fontSize(function(d) { return d.size; })
+      .on("end", draw)
+      .start();
+
+  function draw(words) {
+    d3.select("body").append("svg")
+        .attr("width", 1000)
+        .attr("height", 1000)
+      .append("g")
+        .attr("transform", "translate(400,400)")
+      .selectAll("text")
+        .data(words)
+      .enter().append("text")
+        .style("font-size", function(d) { return d.size + "px"; })
+        .style("font-family", "Impact")
+        .style("fill", function(d, i) { return fill(i); })
+        .attr("text-anchor", "middle")
+        .attr("transform", function(d) {
+          return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+        })
+        .text(function(d) { return d.text; });
+  }
+</script>
+</body>
+</html>
+
