@@ -461,21 +461,87 @@ var dataset = {
 					 	tweet: "Getting ready to start at the #newrigor @umassph",
 					 	group: "empty"
 					 	// 65
+					 },
+					 {
+					 	name: "Red Group",
+					 	username: "Red Group",
+					 	tweet: "Red Group",
+					 	group: "red"
+					 	// 66
+					 },
+					 {
+					 	name: "Orange Group",
+					 	username: "Orange Group",
+					 	tweet: "Orange Group",
+					 	group: "orange",
+					 	// 67
+					 },
+					 {
+					 	name: "Green Group",
+					 	username: "Green Group",
+					 	tweet: "Green Group",
+					 	group: "green",
+					 	// 68
+					 },
+					 {
+					 	name: "Blue Group",
+					 	username: "Blue Group",
+					 	tweet: "Blue Group",
+					 	group: "blue",
+					 	// 69
+					 },
+					 {
+					 	name: "Purple Group",
+					 	username: "Purple Group",
+					 	tweet: "Purple Group",
+					 	group: "purple",
+					 	// 70
 					 }
 				],
 				edges: [
-					{ source: 0, target: 1 },
-					{ source: 0, target: 2 },
-					{ source: 0, target: 3 },
-					{ source: 0, target: 4 },
-					{ source: 1, target: 5 },
-					{ source: 2, target: 5 },
-					{ source: 2, target: 5 },
-					{ source: 3, target: 4 },
-					{ source: 5, target: 8 },
-					{ source: 5, target: 9 },
-					{ source: 6, target: 7 },
-					{ source: 7, target: 8 },
-					{ source: 8, target: 9 }
+					{ source: 0, target: 66 },
+					{ source: 0, target: 67 },
+					{ source: 0, target: 68 },
+					{ source: 0, target: 69 },
+					{ source: 0, target: 70 },
+					{ source: 66, target: 27 },
+					{ source: 66, target: 32 },
+					{ source: 66, target: 44 },
+					{ source: 66, target: 50 },
+					{ source: 66, target: 51 },
+					{ source: 67, target: 24 },
+					{ source: 67, target: 25 },
+					{ source: 67, target: 26 },
+					{ source: 67, target: 29 },
+					{ source: 67, target: 34 },
+					{ source: 67, target: 35 },
+					{ source: 67, target: 37 },
+					{ source: 67, target: 39 },
+					{ source: 67, target: 40 },
+					{ source: 67, target: 45 },
+					{ source: 67, target: 47 },
+					{ source: 67, target: 55 },
+					{ source: 67, target: 57 },
+					{ source: 67, target: 59 },
+					{ source: 67, target: 60 },
+					{ source: 68, target: 19 },
+					{ source: 68, target: 21 },
+					{ source: 68, target: 30 },
+					{ source: 69, target: 10 },
+					{ source: 69, target: 28 },
+					{ source: 69, target: 33 },
+					{ source: 69, target: 36 },
+					{ source: 69, target: 41 },
+					{ source: 69, target: 42 },
+					{ source: 69, target: 43 },
+					{ source: 69, target: 46 },
+					{ source: 69, target: 53 },
+					{ source: 69, target: 56 },
+					{ source: 69, target: 58 },
+					{ source: 70, target: 23 },
+					{ source: 70, target: 31 },
+					{ source: 70, target: 38 },
+					{ source: 70, target: 48 },
+					{ source: 70, target: 54 }
 				]
 			};
