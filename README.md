@@ -8,4 +8,4 @@ During *The New Rigor*, we had lots of great conversation happening on Twitter. 
 
 # How are they made?
 
-[D3, y'all.](http://d3js.org) I'm [Jeffrey Moro](http://jeffreymoro.com), a post-bac with 5CollDH and a novice to all things visualization, so follow along if you want to see me fumble around, or if you want to pitch in and fork this repo!
+[D3, y'all](http://d3js.org), as well as some very useful and straightforward visualization templates from the [twarc](https://github/edsu/twarc) and [twarc-report](https://github.com/pbinkley/twarc-report) repos. I'm [Jeffrey Moro](http://jeffreymoro.com), a post-bac with 5CollDH and a novice to all things visualization, so follow along if you want to see me fumble around, or if you want to pitch in and fork this repo!
