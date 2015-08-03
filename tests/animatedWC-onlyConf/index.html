@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js" charset="utf-8"></script>
+  <script src="../assets/d3.layout.cloud.js"></script>
+  <style>
+  .label {
+  font: 48px "Helvetica Neue";
+  fill: #ddd;
+}
+</style>
+  <script>
+
+//Simple animated example of d3-cloud - https://github.com/jasondavies/d3-cloud
+//Based on https://github.com/jasondavies/d3-cloud/blob/master/examples/simple.html
+
+var w = window,
+    d = document,
+    e = d.documentElement,
+    g = d.getElementsByTagName('body')[0],
+    width = w.innerWidth || e.clientWidth || g.clientWidth,
+    height = w.innerHeight|| e.clientHeight|| g.clientHeight,
+    currentlabel = "";
+
+var data = {"profile": {"args": ["/Users/jeffreymoro/Documents/Projects_Code/newrigor-viz/data_working/nr_dedup_onlyConf.json"], "metadatafile": "/Users/jeffreymoro/Documents/Projects_Code/newrigor-viz/data_working/metadata.json", "earliest": "2015-05-02 12:03:58 EDT", "count": 132, "retweetcount": 66, "end": "None", "geocount": 1, "start": "None", "latest": "2015-05-04 13:37:34 EDT", "opts": {"end": null, "intervalLabel": "10 minutes", "maxwords": 25, "format": "%Y-%m-%d %H:%M", "interval": 600000, "timezone": "America/New_York", "start": null, "template": "wordcloud.html", "intervalStr": "10M", "output": "html"}, "usercount": 22}, "values": [{"words": [{"count": 1, "text": "talking"}, {"count": 1, "text": "evaluation"}, {"count": 1, "text": "skyping"}, {"count": 1, "text": "modes"}, {"count": 1, "text": "scholarship"}], "name": "2015-05-02 12:00", "value": 1}, {"words": [{"count": 1, "text": "ready"}, {"count": 1, "text": "start"}, {"count": 1, "text": "amazing"}, {"count": 1, "text": "robots"}], "name": "2015-05-02 12:20", "value": 2}, {"words": [{"count": 1, "text": "great"}, {"count": 1, "text": "sticks"}, {"count": 1, "text": "undergrad"}, {"count": 1, "text": "minds"}, {"count": 1, "text": "pocky"}, {"count": 1, "text": "time"}, {"count": 1, "text": "symposium"}, {"count": 1, "text": "extremely"}, {"count": 1, "text": "excited"}, {"count": 1, "text": "meet"}], "name": "2015-05-02 12:30", "value": 2}, {"words": [{"count": 1, "text": "conference"}, {"count": 1, "text": "smaller"}, {"count": 1, "text": "group"}, {"count": 1, "text": "helpful"}, {"count": 1, "text": "forming"}, {"count": 1, "text": "tweet"}, {"count": 1, "text": "hand"}, {"count": 1, "text": "going"}, {"count": 1, "text": "keyboard"}, {"count": 1, "text": "kicks"}, {"count": 1, "text": "exciting"}], "name": "2015-05-02 12:40", "value": 3}, {"words": [{"count": 3, "text": "group"}, {"count": 2, "text": "evaluation"}, {"count": 1, "text": "techs"}, {"count": 1, "text": "conversations"}, {"count": 1, "text": "humanities"}, {"count": 1, "text": "discussion"}, {"count": 1, "text": "documentation"}, {"count": 1, "text": "question"}, {"count": 1, "text": "mix"}, {"count": 1, "text": "librarians"}, {"count": 1, "text": "digital"}, {"count": 1, "text": "assessment"}, {"count": 1, "text": "answer"}, {"count": 1, "text": "professional"}, {"count": 1, "text": "investigators"}, {"count": 1, "text": "starting"}, {"count": 1, "text": "principal"}], "name": "2015-05-02 12:50", "value": 4}, {"words": [{"count": 5, "text": "questions"}, {"count": 5, "text": "work"}, {"count": 4, "text": "evaluation"}, {"count": 4, "text": "high"}, {"count": 3, "text": "staff"}, {"count": 3, "text": "group"}, {"count": 3, "text": "risk"}, {"count": 3, "text": "investigators"}, {"count": 3, "text": "principal"}, {"count": 3, "text": "assessment"}, {"count": 3, "text": "model"}, {"count": 2, "text": "member"}, {"count": 2, "text": "tweets"}, {"count": 2, "text": "evaluate"}, {"count": 2, "text": "break"}, {"count": 2, "text": "intellectual"}, {"count": 2, "text": "address"}, {"count": 2, "text": "major"}, {"count": 2, "text": "student"}, {"count": 2, "text": "working"}, {"count": 2, "text": "support"}, {"count": 2, "text": "wondering"}, {"count": 2, "text": "structures"}, {"count": 2, "text": "talking"}, {"count": 2, "text": "humanities"}], "name": "2015-05-02 13:00", "value": 22}, {"words": [{"count": 3, "text": "support"}, {"count": 3, "text": "project"}, {"count": 2, "text": "google"}, {"count": 2, "text": "humanities"}, {"count": 2, "text": "digital"}, {"count": 2, "text": "participation"}, {"count": 2, "text": "collaboration"}, {"count": 2, "text": "review"}, {"count": 2, "text": "difference"}, {"count": 2, "text": "evaluation"}, {"count": 1, "text": "design"}, {"count": 1, "text": "stream"}, {"count": 1, "text": "true"}, {"count": 1, "text": "alternately"}, {"count": 1, "text": "peer"}, {"count": 1, "text": "life"}, {"count": 1, "text": "merit"}, {"count": 1, "text": "tweeting"}, {"count": 1, "text": "analytics"}, {"count": 1, "text": "medium"}, {"count": 1, "text": "involvement"}, {"count": 1, "text": "uncooperative"}, {"count": 1, "text": "diff"}, {"count": 1, "text": "involved"}, {"count": 1, "text": "theoretically"}], "name": "2015-05-02 13:10", "value": 12}, {"words": [{"count": 2, "text": "high"}, {"count": 2, "text": "scholarly"}, {"count": 2, "text": "assessment"}, {"count": 2, "text": "viable"}, {"count": 2, "text": "eval"}, {"count": 2, "text": "work"}, {"count": 2, "text": "project"}, {"count": 2, "text": "push"}, {"count": 1, "text": "funders"}, {"count": 1, "text": "pre"}, {"count": 1, "text": "articulating"}, {"count": 1, "text": "wishing"}, {"count": 1, "text": "talking"}, {"count": 1, "text": "iterations"}, {"count": 1, "text": "landscape"}, {"count": 1, "text": "staff"}, {"count": 1, "text": "suicide"}, {"count": 1, "text": "minimally"}, {"count": 1, "text": "valuing"}, {"count": 1, "text": "union"}, {"count": 1, "text": "support"}, {"count": 1, "text": "squad"}, {"count": 1, "text": "build"}, {"count": 1, "text": "digital"}, {"count": 1, "text": "answer"}], "name": "2015-05-02 13:20", "value": 8}, {"words": [{"count": 1, "text": "small"}, {"count": 1, "text": "perfect"}, {"count": 1, "text": "coffee"}, {"count": 1, "text": "stirrer"}, {"count": 1, "text": "hand"}], "name": "2015-05-02 13:30", "value": 1}, {"words": [{"count": 2, "text": "viable"}, {"count": 1, "text": "product"}, {"count": 1, "text": "minimally"}, {"count": 1, "text": "project"}, {"count": 1, "text": "parts"}, {"count": 1, "text": "build"}, {"count": 1, "text": "answer"}], "name": "2015-05-02 13:40", "value": 1}, {"words": [{"count": 1, "text": "break"}, {"count": 1, "text": "lunch"}, {"count": 1, "text": "folks"}, {"count": 1, "text": "conference"}], "name": "2015-05-02 13:50", "value": 1}, {"words": [{"count": 2, "text": "space"}, {"count": 1, "text": "students"}, {"count": 1, "text": "freedom"}, {"count": 1, "text": "platform"}, {"count": 1, "text": "source"}, {"count": 1, "text": "methodological"}, {"count": 1, "text": "genre"}, {"count": 1, "text": "performance"}], "name": "2015-05-02 14:00", "value": 1}, {"words": [{"count": 2, "text": "conference"}, {"count": 1, "text": "smaller"}, {"count": 1, "text": "helpful"}, {"count": 1, "text": "kicks"}, {"count": 1, "text": "talking"}, {"count": 1, "text": "evaluation"}, {"count": 1, "text": "tweet"}, {"count": 1, "text": "hand"}, {"count": 1, "text": "break"}, {"count": 1, "text": "lunch"}, {"count": 1, "text": "going"}, {"count": 1, "text": "keyboard"}, {"count": 1, "text": "folks"}, {"count": 1, "text": "scholarship"}, {"count": 1, "text": "skyping"}, {"count": 1, "text": "modes"}], "name": "2015-05-02 14:10", "value": 4}, {"words": [], "name": "2015-05-02 14:20", "value": 2}, {"words": [{"count": 2, "text": "great"}, {"count": 2, "text": "talks"}, {"count": 2, "text": "round"}, {"count": 2, "text": "scholarship"}, {"count": 1, "text": "shop"}, {"count": 1, "text": "multiple"}, {"count": 1, "text": "scholar"}, {"count": 1, "text": "models"}, {"count": 1, "text": "house"}, {"count": 1, "text": "lateral"}, {"count": 1, "text": "move"}, {"count": 1, "text": "collaborators"}, {"count": 1, "text": "support"}, {"count": 1, "text": "post"}, {"count": 1, "text": "staff"}], "name": "2015-05-02 14:30", "value": 3}, {"words": [{"count": 2, "text": "episode"}, {"count": 2, "text": "crossover"}, {"count": 1, "text": "room"}, {"count": 1, "text": "great"}, {"count": 1, "text": "hey"}], "name": "2015-05-02 14:40", "value": 4}, {"words": [{"count": 6, "text": "support"}, {"count": 5, "text": "group"}, {"count": 5, "text": "work"}, {"count": 5, "text": "project"}, {"count": 4, "text": "high"}, {"count": 4, "text": "humanities"}, {"count": 4, "text": "discussion"}, {"count": 3, "text": "evaluate"}, {"count": 3, "text": "difference"}, {"count": 3, "text": "review"}, {"count": 3, "text": "evaluation"}, {"count": 3, "text": "assessment"}, {"count": 3, "text": "talking"}, {"count": 3, "text": "digital"}, {"count": 3, "text": "collaboration"}, {"count": 3, "text": "data"}, {"count": 3, "text": "scholarship"}, {"count": 2, "text": "questions"}, {"count": 2, "text": "staff"}, {"count": 2, "text": "risk"}, {"count": 2, "text": "projects"}, {"count": 2, "text": "investigators"}, {"count": 2, "text": "analytics"}, {"count": 2, "text": "design"}, {"count": 2, "text": "nec"}], "name": "2015-05-02 14:50", "value": 42}, {"words": [{"count": 2, "text": "scholarship"}, {"count": 1, "text": "shop"}, {"count": 1, "text": "house"}, {"count": 1, "text": "move"}, {"count": 1, "text": "analytics"}, {"count": 1, "text": "post"}, {"count": 1, "text": "lateral"}, {"count": 1, "text": "young"}, {"count": 1, "text": "assessment"}, {"count": 1, "text": "firm"}, {"count": 1, "text": "supporting"}, {"count": 1, "text": "multiple"}, {"count": 1, "text": "models"}, {"count": 1, "text": "levels"}, {"count": 1, "text": "separation"}, {"count": 1, "text": "evaluations"}, {"count": 1, "text": "scholars"}, {"count": 1, "text": "collaborators"}, {"count": 1, "text": "scholar"}, {"count": 1, "text": "filter"}, {"count": 1, "text": "evaluating"}, {"count": 1, "text": "support"}], "name": "2015-05-02 15:00", "value": 6}, {"words": [{"count": 1, "text": "large"}, {"count": 1, "text": "existential"}, {"count": 1, "text": "peers"}, {"count": 1, "text": "understand"}, {"count": 1, "text": "questions"}], "name": "2015-05-02 15:20", "value": 2}, {"words": [{"count": 1, "text": "great"}, {"count": 1, "text": "tough"}, {"count": 1, "text": "god"}, {"count": 1, "text": "facilitating"}, {"count": 1, "text": "ideas"}, {"count": 1, "text": "brought"}, {"count": 1, "text": "conversation"}, {"count": 1, "text": "borbon"}, {"count": 1, "text": "today"}], "name": "2015-05-02 15:30", "value": 2}, {"words": [], "name": "2015-05-02 15:50", "value": 1}, {"words": [{"count": 1, "text": "development"}, {"count": 1, "text": "valued"}, {"count": 1, "text": "humanities"}, {"count": 1, "text": "creative"}, {"count": 1, "text": "sciences"}, {"count": 1, "text": "technology"}, {"count": 1, "text": "discoveries"}], "name": "2015-05-02 19:00", "value": 1}, {"words": [{"count": 1, "text": "building"}, {"count": 1, "text": "coproduces"}, {"count": 1, "text": "work"}, {"count": 1, "text": "images"}, {"count": 1, "text": "campbell"}, {"count": 1, "text": "interface"}, {"count": 1, "text": "display"}], "name": "2015-05-02 20:00", "value": 1}, {"words": [{"count": 3, "text": "great"}, {"count": 2, "text": "tough"}, {"count": 2, "text": "facilitating"}, {"count": 2, "text": "ideas"}, {"count": 2, "text": "brought"}, {"count": 2, "text": "conversation"}, {"count": 2, "text": "today"}, {"count": 1, "text": "god"}, {"count": 1, "text": "borbon"}], "name": "2015-05-03 18:40", "value": 4}, {"words": [], "name": "2015-05-03 18:50", "value": 1}, {"words": [{"count": 1, "text": "campbell"}, {"count": 1, "text": "project"}, {"count": 1, "text": "build"}], "name": "2015-05-04 13:30", "value": 1}], "metadata": {"title": "/Users/jeffreymoro/Documents/Projects_Code/newrigor-viz/data_working/nr_dedup_onlyConf.json"}};
+var values = data["values"];
+    
+// Encapsulate the word cloud functionality
+function wordCloud(selector) {
+
+    // get highest count, to serve as high of pointsize domain
+    var max = d3.max(d3.entries(values), function(d) {
+        return (d.value["words"].length > 0) ? d.value["words"][0]["count"] : 0;
+    });
+
+    // linear scale to convert counts to point sizes
+    var pointsize = d3.scale.log()
+        .domain([1, max])
+        .range([24, 60]);
+        
+    //Construct the word cloud's SVG element
+    var svg = d3.select(selector).append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .append("g")
+        .attr("transform", "translate(" + Math.round(width/2) + "," + Math.round(height/2) + ")");
+
+// Add the timeslice label; the value is set on transition.
+var label = svg.append("text")
+    .attr("class", "label")
+    .attr("text-anchor", "start")
+    .attr("y", Math.round(height/2) * -1 +48)
+    .attr("x", Math.round(width/2) * -1 +24)
+    .text("");
+
+    //Draw the word cloud
+    function draw(words) {
+        // transition timing modelled on http://stackoverflow.com/questions/26421388/d3-js-subtransition-with-exit-and-enter
+        label.text(currentlabel);
+
+        var cloud = svg.selectAll("g text.word")
+                        .data(words, function(d) { return d.text; })
+        var transition=d3.transition().duration(2000);
+        
+        // remove exiting words 
+        if (!cloud.exit().empty()) 
+            transition = transition.each(function(){
+                cloud.exit()
+                    .transition()
+                        .duration(1000)
+                        .style("fill", "gray")
+                        .style('fill-opacity', 1e-6)
+                        .attr('font-size', 1)
+                        .remove();
+            }).transition();
+
+        // Resize and reposition updating words
+        if (!cloud.empty()) {
+
+            transition = transition.each(function(){
+                cloud
+                    .transition()
+                        .duration(1000)
+                        .style("fill", "black")
+                        .style("font-size", function(d) { return d.size + "px"; })
+                        .attr("transform", function(d) {
+                                return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+                            })
+                        .style("fill-opacity", 1);
+            }).transition();
+        }
+        
+        //Entering words
+        if (!cloud.enter().empty()) 
+            transition=transition.each(function(){
+                cloud.enter()
+                    .append("text")
+                    .style("font-family", "Futura")
+                    .style("fill", "red")
+                    .attr("class", "word")
+                    .attr("text-anchor", "middle")
+                    .attr('font-size', 0)
+                    .text(function(d) { return d.text; })
+                        .attr("transform", function(d) {
+                                return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+                            })
+                    .transition()
+                        .duration(1000)
+                        .style("font-size", function(d) { return d.size + "px"; })
+                        .style("fill-opacity", 1);
+            }).transition();
+
+    }
+
+
+    //Use the module pattern to encapsulate the visualisation code. We'll
+    // expose only the parts that need to be public.
+    return {
+
+        //Recompute the word cloud for a new set of words. This method will
+        // asycnhronously call draw when the layout has been computed.
+        //The outside world will need to call this function, so make it part
+        // of the wordCloud return value.
+        update: function(words) {
+            d3.layout.cloud().size([width, height])
+                .words(words)
+                .padding(5)
+                .rotate(20)
+                .font("Futura")
+                .fontSize(function(d) { return pointsize(d.size); })
+                .on("end", draw)
+                .start();
+        }
+    }
+
+}
+
+function getWords(words) {
+    return words.map(function(d) {
+        return {text: d.text, size: d.count};
+    })
+}
+
+//Create a new instance of the word cloud visualisation.
+var myWordCloud = wordCloud('body');
+
+//This method tells the word cloud to redraw with a new set of words.
+//In reality the new words would probably come from a server request,
+// user input or some other source.
+
+
+function showNewWords(x) {
+    value = values[x];
+    // TODO format label for different intervals
+    currentlabel = value.name + ":00 : " + value.value + " tweet" + ((value.value > 1) ? "s" : "");
+    myWordCloud.update(getWords(value["words"]));
+    if (x != values.length) {
+        setTimeout(function() { showNewWords(x + 1)}, 7000)
+    }
+}
+
+//Start cycling through the data
+showNewWords(0);
+
+
+
+</script>
+
+
