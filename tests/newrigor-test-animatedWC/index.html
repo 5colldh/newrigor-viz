@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js" charset="utf-8"></script>
+  <script src="../assets/d3.layout.cloud.js"></script>
+  <style>
+  .label {
+  font: 48px "Helvetica Neue";
+  fill: #ddd;
+}
+</style>
+  <script>
+
+//Simple animated example of d3-cloud - https://github.com/jasondavies/d3-cloud
+//Based on https://github.com/jasondavies/d3-cloud/blob/master/examples/simple.html
+
+var w = window,
+    d = document,
+    e = d.documentElement,
+    g = d.getElementsByTagName('body')[0],
+    width = w.innerWidth || e.clientWidth || g.clientWidth,
+    height = w.innerHeight|| e.clientHeight|| g.clientHeight,
+    currentlabel = "";
+
+var data = {"profile": {"args": ["/data/nr_dedup.json"], "metadatafile": "metadata.json", "earliest": "2015-04-30 20:24:27 UTC", "count": 283, "retweetcount": 145, "end": "None", "geocount": 2, "start": "None", "latest": "2015-05-04 17:37:34 UTC", "opts": {"end": null, "intervalLabel": "1 hour", "maxwords": 50, "format": "%Y-%m-%d %H", "interval": 3600000, "timezone": "", "start": null, "template": "wordcloud.html", "intervalStr": "1H", "output": "html"}, "usercount": 29}, "values": [{"words": [{"count": 1, "text": "conference"}, {"count": 1, "text": "join"}, {"count": 1, "text": "kali"}, {"count": 1, "text": "registered"}, {"count": 1, "text": "register"}, {"count": 1, "text": "convo"}], "name": "2015-04-30 20", "value": 1}, {"words": [{"count": 2, "text": "conference"}, {"count": 2, "text": "register"}, {"count": 2, "text": "join"}, {"count": 2, "text": "registered"}, {"count": 2, "text": "convo"}, {"count": 1, "text": "ancient"}, {"count": 1, "text": "juliana"}, {"count": 1, "text": "fellow"}, {"count": 1, "text": "maps"}, {"count": 1, "text": "danielle"}, {"count": 1, "text": "proj"}, {"count": 1, "text": "student"}, {"count": 1, "text": "roads"}, {"count": 1, "text": "symposium"}, {"count": 1, "text": "john"}, {"count": 1, "text": "pompeii"}, {"count": 1, "text": "sat"}], "name": "2015-05-01 15", "value": 3}, {"words": [{"count": 1, "text": "cyberspace"}, {"count": 1, "text": "craig"}, {"count": 1, "text": "fellow"}, {"count": 1, "text": "proj"}, {"count": 1, "text": "allow"}, {"count": 1, "text": "internet"}, {"count": 1, "text": "campbell"}, {"count": 1, "text": "dream"}, {"count": 1, "text": "sat"}], "name": "2015-05-01 17", "value": 1}, {"words": [{"count": 1, "text": "conference"}, {"count": 1, "text": "join"}, {"count": 1, "text": "registered"}, {"count": 1, "text": "register"}, {"count": 1, "text": "convo"}, {"count": 1, "text": "heidi"}], "name": "2015-05-01 23", "value": 1}, {"words": [{"count": 1, "text": "conference"}, {"count": 1, "text": "lemme"}, {"count": 1, "text": "student"}, {"count": 1, "text": "ready"}, {"count": 1, "text": "symposium"}, {"count": 1, "text": "guys"}, {"count": 1, "text": "tomorrow"}], "name": "2015-05-02 02", "value": 1}, {"words": [{"count": 2, "text": "undergrad"}, {"count": 2, "text": "coralie"}, {"count": 2, "text": "fellow"}, {"count": 2, "text": "project"}, {"count": 2, "text": "explore"}, {"count": 2, "text": "today"}, {"count": 2, "text": "pardo"}], "name": "2015-05-02 09", "value": 2}, {"words": [{"count": 2, "text": "fellow"}, {"count": 2, "text": "today"}, {"count": 1, "text": "cyberspace"}, {"count": 1, "text": "craig"}, {"count": 1, "text": "undergrad"}, {"count": 1, "text": "coralie"}, {"count": 1, "text": "project"}, {"count": 1, "text": "explore"}, {"count": 1, "text": "proj"}, {"count": 1, "text": "allow"}, {"count": 1, "text": "internet"}, {"count": 1, "text": "campbell"}, {"count": 1, "text": "dream"}, {"count": 1, "text": "pardo"}], "name": "2015-05-02 11", "value": 2}, {"words": [{"count": 2, "text": "undergrad"}, {"count": 2, "text": "today"}, {"count": 1, "text": "juliana"}, {"count": 1, "text": "van"}, {"count": 1, "text": "roggen"}, {"count": 1, "text": "coralie"}, {"count": 1, "text": "fellow"}, {"count": 1, "text": "project"}, {"count": 1, "text": "maps"}, {"count": 1, "text": "explore"}, {"count": 1, "text": "streets"}, {"count": 1, "text": "proj"}, {"count": 1, "text": "iron"}, {"count": 1, "text": "pompeii"}, {"count": 1, "text": "pardo"}], "name": "2015-05-02 12", "value": 2}, {"words": [{"count": 20, "text": "johnson"}, {"count": 18, "text": "project"}, {"count": 17, "text": "campbell"}, {"count": 14, "text": "pardo"}, {"count": 12, "text": "wang"}, {"count": 9, "text": "game"}, {"count": 8, "text": "loops"}, {"count": 7, "text": "queer"}, {"count": 7, "text": "virtual"}, {"count": 6, "text": "window"}, {"count": 6, "text": "space"}, {"count": 6, "text": "digital"}, {"count": 5, "text": "tape"}, {"count": 5, "text": "basement"}, {"count": 5, "text": "takes"}, {"count": 5, "text": "cyborg"}, {"count": 5, "text": "cues"}, {"count": 4, "text": "haraway"}, {"count": 4, "text": "police"}, {"count": 4, "text": "program"}, {"count": 4, "text": "civilian"}, {"count": 4, "text": "practice"}, {"count": 4, "text": "undergrad"}, {"count": 4, "text": "response"}, {"count": 4, "text": "individual"}], "name": "2015-05-02 14", "value": 73}, {"words": [{"count": 22, "text": "van"}, {"count": 20, "text": "roggen"}, {"count": 12, "text": "force"}, {"count": 11, "text": "pompeii"}, {"count": 11, "text": "streets"}, {"count": 11, "text": "iron"}, {"count": 10, "text": "maps"}, {"count": 9, "text": "juliana"}, {"count": 9, "text": "technology"}, {"count": 8, "text": "deposits"}, {"count": 7, "text": "wang"}, {"count": 6, "text": "hope"}, {"count": 6, "text": "poses"}, {"count": 6, "text": "despair"}, {"count": 6, "text": "digital"}, {"count": 4, "text": "clusters"}, {"count": 4, "text": "molten"}, {"count": 4, "text": "map"}, {"count": 4, "text": "fellowship"}, {"count": 4, "text": "revealing"}, {"count": 4, "text": "panel"}, {"count": 4, "text": "arcgis"}, {"count": 4, "text": "sounds"}, {"count": 4, "text": "goals"}, {"count": 4, "text": "project"}], "name": "2015-05-02 15", "value": 64}, {"words": [{"count": 4, "text": "group"}, {"count": 3, "text": "evaluation"}, {"count": 2, "text": "question"}, {"count": 1, "text": "smaller"}, {"count": 1, "text": "sticks"}, {"count": 1, "text": "librarians"}, {"count": 1, "text": "presentation"}, {"count": 1, "text": "talking"}, {"count": 1, "text": "keyboard"}, {"count": 1, "text": "ready"}, {"count": 1, "text": "skyping"}, {"count": 1, "text": "principal"}, {"count": 1, "text": "conference"}, {"count": 1, "text": "leaning"}, {"count": 1, "text": "techs"}, {"count": 1, "text": "humanities"}, {"count": 1, "text": "discussion"}, {"count": 1, "text": "start"}, {"count": 1, "text": "pocky"}, {"count": 1, "text": "mix"}, {"count": 1, "text": "amazing"}, {"count": 1, "text": "going"}, {"count": 1, "text": "terrifying"}, {"count": 1, "text": "forming"}, {"count": 1, "text": "answer"}], "name": "2015-05-02 16", "value": 13}, {"words": [{"count": 8, "text": "work"}, {"count": 7, "text": "project"}, {"count": 6, "text": "evaluation"}, {"count": 6, "text": "support"}, {"count": 6, "text": "assessment"}, {"count": 6, "text": "high"}, {"count": 5, "text": "questions"}, {"count": 5, "text": "scholarly"}, {"count": 5, "text": "digital"}, {"count": 4, "text": "staff"}, {"count": 4, "text": "group"}, {"count": 4, "text": "risk"}, {"count": 4, "text": "investigators"}, {"count": 4, "text": "principal"}, {"count": 4, "text": "viable"}, {"count": 4, "text": "talking"}, {"count": 4, "text": "humanities"}, {"count": 3, "text": "evaluate"}, {"count": 3, "text": "break"}, {"count": 3, "text": "participation"}, {"count": 3, "text": "tweets"}, {"count": 3, "text": "collaboration"}, {"count": 3, "text": "model"}, {"count": 2, "text": "note"}, {"count": 2, "text": "parts"}], "name": "2015-05-02 17", "value": 45}, {"words": [{"count": 7, "text": "support"}, {"count": 6, "text": "scholarship"}, {"count": 5, "text": "group"}, {"count": 5, "text": "work"}, {"count": 5, "text": "project"}, {"count": 4, "text": "evaluation"}, {"count": 4, "text": "great"}, {"count": 4, "text": "high"}, {"count": 4, "text": "talking"}, {"count": 4, "text": "humanities"}, {"count": 4, "text": "discussion"}, {"count": 3, "text": "talks"}, {"count": 3, "text": "staff"}, {"count": 3, "text": "evaluate"}, {"count": 3, "text": "difference"}, {"count": 3, "text": "round"}, {"count": 3, "text": "review"}, {"count": 3, "text": "conference"}, {"count": 3, "text": "assessment"}, {"count": 3, "text": "digital"}, {"count": 3, "text": "models"}, {"count": 3, "text": "collaboration"}, {"count": 3, "text": "hand"}, {"count": 3, "text": "data"}, {"count": 2, "text": "shop"}], "name": "2015-05-02 18", "value": 56}, {"words": [{"count": 2, "text": "scholarship"}, {"count": 1, "text": "shop"}, {"count": 1, "text": "tough"}, {"count": 1, "text": "house"}, {"count": 1, "text": "move"}, {"count": 1, "text": "young"}, {"count": 1, "text": "brought"}, {"count": 1, "text": "analytics"}, {"count": 1, "text": "questions"}, {"count": 1, "text": "multiple"}, {"count": 1, "text": "evaluations"}, {"count": 1, "text": "filter"}, {"count": 1, "text": "god"}, {"count": 1, "text": "lateral"}, {"count": 1, "text": "ideas"}, {"count": 1, "text": "assessment"}, {"count": 1, "text": "today"}, {"count": 1, "text": "firm"}, {"count": 1, "text": "supporting"}, {"count": 1, "text": "borbon"}, {"count": 1, "text": "models"}, {"count": 1, "text": "peers"}, {"count": 1, "text": "levels"}, {"count": 1, "text": "understand"}, {"count": 1, "text": "separation"}], "name": "2015-05-02 19", "value": 11}, {"words": [{"count": 1, "text": "development"}, {"count": 1, "text": "valued"}, {"count": 1, "text": "humanities"}, {"count": 1, "text": "creative"}, {"count": 1, "text": "sciences"}, {"count": 1, "text": "technology"}, {"count": 1, "text": "discoveries"}], "name": "2015-05-02 23", "value": 1}, {"words": [{"count": 1, "text": "building"}, {"count": 1, "text": "coproduces"}, {"count": 1, "text": "work"}, {"count": 1, "text": "images"}, {"count": 1, "text": "campbell"}, {"count": 1, "text": "interface"}, {"count": 1, "text": "display"}], "name": "2015-05-03 00", "value": 1}, {"words": [{"count": 3, "text": "great"}, {"count": 2, "text": "tough"}, {"count": 2, "text": "facilitating"}, {"count": 2, "text": "ideas"}, {"count": 2, "text": "brought"}, {"count": 2, "text": "conversation"}, {"count": 2, "text": "today"}, {"count": 1, "text": "god"}, {"count": 1, "text": "borbon"}], "name": "2015-05-03 22", "value": 5}, {"words": [{"count": 1, "text": "campbell"}, {"count": 1, "text": "project"}, {"count": 1, "text": "build"}], "name": "2015-05-04 17", "value": 1}], "metadata": {"title": "New Rigor Animated Word Cloud Test"}};
+var values = data["values"];
+    
+// Encapsulate the word cloud functionality
+function wordCloud(selector) {
+
+    // get highest count, to serve as high of pointsize domain
+    var max = d3.max(d3.entries(values), function(d) {
+        return (d.value["words"].length > 0) ? d.value["words"][0]["count"] : 0;
+    });
+
+    // linear scale to convert counts to point sizes
+    var pointsize = d3.scale.log()
+        .domain([1, max])
+        .range([24, 60]);
+        
+    //Construct the word cloud's SVG element
+    var svg = d3.select(selector).append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .append("g")
+        .attr("transform", "translate(" + Math.round(width/2) + "," + Math.round(height/2) + ")");
+
+// Add the timeslice label; the value is set on transition.
+var label = svg.append("text")
+    .attr("class", "label")
+    .attr("text-anchor", "start")
+    .attr("y", Math.round(height/2) * -1 +48)
+    .attr("x", Math.round(width/2) * -1 +24)
+    .text("");
+
+    //Draw the word cloud
+    function draw(words) {
+        // transition timing modelled on http://stackoverflow.com/questions/26421388/d3-js-subtransition-with-exit-and-enter
+        label.text(currentlabel);
+
+        var cloud = svg.selectAll("g text.word")
+                        .data(words, function(d) { return d.text; })
+        var transition=d3.transition().duration(2000);
+        
+        // remove exiting words 
+        if (!cloud.exit().empty()) 
+            transition = transition.each(function(){
+                cloud.exit()
+                    .transition()
+                        .duration(1000)
+                        .style("fill", "gray")
+                        .style('fill-opacity', 1e-6)
+                        .attr('font-size', 1)
+                        .remove();
+            }).transition();
+
+        // Resize and reposition updating words
+        if (!cloud.empty()) {
+
+            transition = transition.each(function(){
+                cloud
+                    .transition()
+                        .duration(1000)
+                        .style("fill", "black")
+                        .style("font-size", function(d) { return d.size + "px"; })
+                        .attr("transform", function(d) {
+                                return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+                            })
+                        .style("fill-opacity", 1);
+            }).transition();
+        }
+        
+        //Entering words
+        if (!cloud.enter().empty()) 
+            transition=transition.each(function(){
+                cloud.enter()
+                    .append("text")
+                    .style("font-family", "Futura")
+                    .style("fill", "red")
+                    .attr("class", "word")
+                    .attr("text-anchor", "middle")
+                    .attr('font-size', 0)
+                    .text(function(d) { return d.text; })
+                        .attr("transform", function(d) {
+                                return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+                            })
+                    .transition()
+                        .duration(1000)
+                        .style("font-size", function(d) { return d.size + "px"; })
+                        .style("fill-opacity", 1);
+            }).transition();
+
+    }
+
+
+    //Use the module pattern to encapsulate the visualisation code. We'll
+    // expose only the parts that need to be public.
+    return {
+
+        //Recompute the word cloud for a new set of words. This method will
+        // asycnhronously call draw when the layout has been computed.
+        //The outside world will need to call this function, so make it part
+        // of the wordCloud return value.
+        update: function(words) {
+            d3.layout.cloud().size([width, height])
+                .words(words)
+                .padding(5)
+                .rotate(20)
+                .font("Futura")
+                .fontSize(function(d) { return pointsize(d.size); })
+                .on("end", draw)
+                .start();
+        }
+    }
+
+}
+
+function getWords(words) {
+    return words.map(function(d) {
+        return {text: d.text, size: d.count};
+    })
+}
+
+//Create a new instance of the word cloud visualisation.
+var myWordCloud = wordCloud('body');
+
+//This method tells the word cloud to redraw with a new set of words.
+//In reality the new words would probably come from a server request,
+// user input or some other source.
+
+
+function showNewWords(x) {
+    value = values[x];
+    // TODO format label for different intervals
+    currentlabel = value.name + ":00 : " + value.value + " tweet" + ((value.value > 1) ? "s" : "");
+    myWordCloud.update(getWords(value["words"]));
+    if (x != values.length) {
+        setTimeout(function() { showNewWords(x + 1)}, 7000)
+    }
+}
+
+//Start cycling through the data
+showNewWords(0);
+
+
+
+</script>
+
+
