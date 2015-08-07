@@ -10,7 +10,7 @@ graph = JSON.parse(dataset);
 var force = d3.layout.force()
 		 .size([w, h])
 		 .linkDistance([50])
-		 .charge([-100]);
+		 .charge([-1000]);
 
 //Create SVG element
 var svg = d3.select("body")
