@@ -9,3 +9,7 @@ During *The New Rigor*, we had lots of great conversation happening on Twitter. 
 # How are they made?
 
 [D3, y'all](http://d3js.org), as well as some very useful and straightforward visualization templates from the [twarc](https://github/edsu/twarc) and [twarc-report](https://github.com/pbinkley/twarc-report) repos. I'm [Jeffrey Moro](http://jeffreymoro.com), a post-bac with 5CollDH and a novice to all things visualization, so follow along if you want to see me fumble around, or if you want to pitch in and fork this repo!
+
+# Where can I see them in action? 
+
+Go to [http://thenewrigor.5colldh.org/visualizations](http://thenewrigor.5colldh.org/viz) to check them out. So far, I've made a [timeline](http://thenewrigor.5colldh.org/viz/timeline) of all of the tweets sent out during the conference and a [force-directed layout](http://thenewrigor.5colldh.org/viz/force) that gives the tweets some sproingy action.
