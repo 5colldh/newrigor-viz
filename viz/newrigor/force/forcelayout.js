@@ -1,6 +1,7 @@
 //Width and height
-var w = 950;
-var h = 550;
+var width = 950;
+var height = 550;
+var margin = {top: 30, right: 10, bottom: 25, left: 300};
 
 //Get the dataset
 var dataset = document.getElementById('dataset').innerHTML;
@@ -8,15 +9,17 @@ graph = JSON.parse(dataset);
 
 //Initialize force layout
 var force = d3.layout.force()
-		 .size([w, h])
+		 .size([width, height])
 		 .linkDistance([50])
-		 .charge([-1000]);
+		 .charge([-100]);
 
 //Create SVG element
-var svg = d3.select("body")
-.append("svg")
-.attr("width", w)
-.attr("height", h);
+var svg = d3.select("#canvas")
+    .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 //Create graph structure
 force.nodes(graph.nodes)
@@ -25,7 +28,7 @@ force.nodes(graph.nodes)
 
 // Assign colors to groups
 var colors = function(dataset){
-	if (dataset.group === "empty") {
+	if (dataset.group === "none") {
 		return "#949494";
 	} else if (dataset.group === "red") {
 		return "#ff0000";
@@ -61,13 +64,13 @@ var node = svg.selectAll(".node")
 	.style("fill", colors)
 	.call(force.drag)
 	// Update label box
-	.on("mouseover", function(d) {
+	.on("click", function(d) {
 		d3.select("#labelbox")
 		.select("#name")
 		.text(d.name);
 		d3.select("#labelbox")	
 		.select("#username")
-		.text(d.username);
+    	.html('<a href="http://www.twitter.com/' + d.username + '" target="_blank">' + d.username + '</a>');
 		d3.select("#labelbox")
 		.select("#tweet")
 		.text(d.tweet);
