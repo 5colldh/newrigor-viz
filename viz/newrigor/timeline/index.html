@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>A Timeline Test</title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js" charset="utf-8"></script>
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<link href='http://fonts.googleapis.com/css?family=Lato|Raleway:300,700' rel='stylesheet' type='text/css'>
+</head>
+<body>
+<div id="label">
+		<h1>The New Rigor</h1>
+		<h3>A timeline</h3>
+		<p>This timeline shows all of the tweets sent out during <i>The New Rigor</i>, <a href="http://5colldh.org" target="_blank">Five College Digital Humanities'</a> spring 2015 conference on innovation and assessment in digital projects. Click on any of the circles to see the tweets, and double click to return the timeline to neutral.</p>
+
+		<div id="labelbox">
+			<p><span class="labelname">Name:</span> <span id="name"></span></p>
+			<p><span class="labelname">Handle:</span> <span id="username"></span></p>
+			<p><span class="labelname">Tweet:</span> <span id="tweet"></span></p>
+			<p><span class="labelname">Group:</span> <span id="group"></span></p>
+		</div>
+		<p class="credit">Built by <a href="http://jeffreymoro.com" target="_blank">Jeffrey Moro</a> with <a href="http://d3js.org" target="_blank">D3.js</a> Check out how we built this timeline and other visualizations <a href="http://www.github.com/jeffreymoro/newrigor-viz/" target="_blank">on GitHub</a>!</p>
+</div>
+<div id="canvas">
+</div>
+	<script type="text/javascript" src="timeline.js"></script>
+</body>
+</html>
