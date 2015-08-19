@@ -1,0 +1,33 @@
+#label {
+	position: fixed;
+	float: left;
+	width: 300px;
+	height: 600px;
+	padding: 20px;
+	background-color: #F0ECE2;
+}
+h1 {
+	font-family: "Raleway", sans-serif;
+	text-decoration: underline;
+}
+h3 {
+	font-family: "Raleway", sans-serif;
+}
+.labelname {
+	font-family: "Raleway", sans-serif;
+	font-size: 1.3em;
+	font-weight: 300;
+	color: #ff3333;
+}
+body {
+	font-family: Lato, sans-serif;
+}
+.tick {
+	font-family: "Raleway", sans-serif;
+	font-weight: 700;
+}
+.credit {
+	position: fixed;
+	font-size: 0.8em;
+	width: 300px;
+}
